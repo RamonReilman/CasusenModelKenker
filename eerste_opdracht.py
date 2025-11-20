@@ -80,4 +80,3 @@ print_output("CGI+", seq_cgi)
 # input voor de buiten de eilanden
 seq_non_cgi = generate_sequence(300, NON_CGI_TRANS)
 print_output("CGI-", seq_non_cgi)
-
