@@ -1,5 +1,6 @@
 import numpy as np
 from math import log
+from scipy.special import logsumexp
 class HiddenMarkovModel:
     __SCALE = 10
     def __init__(self, n_components, n_features):
@@ -24,8 +25,42 @@ class HiddenMarkovModel:
     def __repr__(self):
         return f"HiddenMarkovModel(n_components:{self.n_components},n_features:{self.n_features})"
 
-    def score(self, X, state_sequence):
-        self.__validate_matrices()
+    def score(self, X, state_sequence = None):
+        if state_sequence is not None:
+            return self.__log_prob_with_states(X, state_sequence)
+
+        return self.__log_prob_without_states(X)
+
+    def __log_prob_without_states(self, X):
+        n_obs = len(X)
+        n_states = len(self.__av_states)
+
+        prob_matrix = np.zeros((n_states, n_obs), dtype=float)
+        prob_matrix_log = np.zeros((n_states, n_obs), dtype=float)
+
+        for state in range(n_states):
+            prob_matrix[state, 0] = (self.startprob_[state]  * self.emissionprob_[state][X[0]])
+            prob_matrix_log[state, 0] = (self.__safe_log(self.startprob_[state]) + self.__safe_log(self.emissionprob_[state][X[0]]))
+        for t in range(1, n_obs):
+            for state_t in range(0, n_states):
+                temp_probability = []
+                temp_probability_log = []
+                for state_t_minus in range(0, n_states):
+                    prev_probability = prob_matrix[state_t_minus, t-1]
+                    prev_prob_log = prob_matrix_log[state_t_minus, t-1]
+                    state_t_minus_X_emission = self.emissionprob_[state_t][X[t]]
+                    state_transition_prob = self.transmat_[state_t_minus][state_t]
+
+                    temp_probability.append(prev_probability * state_t_minus_X_emission * state_transition_prob)
+                    temp_probability_log.append(prev_prob_log + self.__safe_log(state_t_minus_X_emission) + self.__safe_log(state_transition_prob))
+
+                prob_matrix[state_t, t] = sum(temp_probability)
+                prob_matrix_log[state_t, t] = logsumexp(temp_probability_log)
+
+        return np.sum(prob_matrix[:, -1]), logsumexp(prob_matrix_log[:, -1])
+
+
+    def __log_prob_with_states(self, X, state_sequence):
         log_score = 0.0
         state_prob = self.startprob_[state_sequence[0]]
         emission_prob = self.emissionprob_[state_sequence[0]][X[0]]
