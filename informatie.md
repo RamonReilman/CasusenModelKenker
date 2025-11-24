@@ -116,3 +116,21 @@ ln(p) = log(1/3) +log(1/12) + log( 1/2) + log(1/2) + log( 1/2) + log( 5/12) + lo
 ⋮ log(1/3) + log(1/2)
 Out[3]: -10.121948155945955
 
+## Deel 3
+Wat nu als we alleen de emissies weten? Wat is de meest waarschijnlijke reeks van tafels?
+
+Betere aanpak dan alle mogelijke reeksen bekijken een daar de max van pakken. Niet exponentieel -> lineair
+
+### Decoding probleem
+#### Viterbi-algoritme
+
+Bepaal voor alle reeksen die eindigen bij een zekere tafel (toestand) de meest waarschijnlijke reeks toestanden + de kans daarop
+
+|                                                                                 Eindig bij tafel 1 |                                       Eindig bij tafel 2                                       |                                         Eindig bij tafel 3                                        |
+|---------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------:|
+| 1/18                                                                                               | 1/18                                                                                           | 5/36 Deze wint                                                                                    |
+| 1/18 * 1/6 * 1/2 = 1/216  1/18 * 1/6 * 1/2 = 1/216  5/36 * 2/3 * 1/2 = 5/108 max(p)? 5/108 winnaar | 1/18 * 1/2 * 1/6 = 1/216!  1/18 * 1/3 * 1/6 = 1/324  5/36 * 1/6 * 1/6 = 5/1296 max(p)? 1/216   | 1/18 * 1/3 * 1/12 = 1/648  1/18 * 1/2 * 1/12 = 1/432!  5/36 * 1/6 * 1/12 = 5 / 2592 max p = 1/432 |
+| 5/108 * 1/6 * 1/4 = 5/2592!  1/216 * 1/6 * 1/4 = 1/5184  1/432 * 2/3 * 1/4 = 1/2592                | 5/108 * 1/2 * 1/2 = 5/432!  1/216 * 1/3 * 1/2 = 1/1296  1/432 * 1/6 * 1/2 = 1/5184             | 5/108 * 1/3 * 0 = 0  0  0                                                                         |
+|                                                                                                    |                                                                                                |                                                                                                   |
+
+Je gebruikt dus de uitkomst van t-1  (maximale waarschijnlijkheid) om de kans van t te berekenen. Ook test je alle mogelijke toestanden uit voor elke emissie. 
