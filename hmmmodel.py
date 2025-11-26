@@ -26,12 +26,19 @@ class HiddenMarkovModel:
         return f"HiddenMarkovModel(n_components:{self.n_components},n_features:{self.n_features})"
 
     def score(self, X, state_sequence = None):
+        """
+        Calculates the score (log-prob)
+        :param X: Iterable of emissions
+        :param state_sequence: Iterable of states, optional
+        :return: log of score probability
+        """
         if state_sequence is not None:
             return self.__log_prob_with_states(X, state_sequence)
 
         return self.__log_prob_without_states(X)
 
     def __log_prob_without_states(self, X):
+
         n_obs = len(X)
         n_states = len(self.__av_states)
 
@@ -77,6 +84,11 @@ class HiddenMarkovModel:
         return log_score
 
     def sample(self, n_samples):
+        """
+        Generates states and emissions based on matrices
+        :param n_samples:  N states / emissions to be generated
+        :return: tuple of np.array emissions and np.array states
+        """
         self.__validate_matrices()
         state = self.__get_random_start_state()
         emission = self.__get_random_emission(state)
@@ -106,6 +118,11 @@ class HiddenMarkovModel:
         return float("-inf") if p == 0 else log(p)
 
     def predict(self, X):
+        """
+        Predicts states based on emissions
+        :param X: Iterable of emissions
+        :return: List of sequence of states
+        """
 
         # Setup matrices
         n_states = len(self.__av_states)
@@ -147,8 +164,6 @@ class HiddenMarkovModel:
 
     def __get_final_state(self, probabilities):
         return np.argmax(probabilities[:, -1])
-
-
 
     def __get_random_start_state(self):
         return np.random.choice(self.__av_states, p = self.startprob_)
